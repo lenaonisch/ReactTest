@@ -4,7 +4,9 @@ import { RouteComponentProps } from 'react-router';
 import { Link } from 'react-router-dom';
 import { ApplicationState } from '../store';
 import * as TransactionsStore from '../store/Transactions';
-//import { DropdownButton, Dropdown } from 'react-bootstrap';
+import Form from 'react-bootstrap/Form';
+import Col from 'react-bootstrap/esm/Col';
+import Row from 'react-bootstrap/esm/Row';
 
 // At runtime, Redux will merge together...
 type TransactionProps =
@@ -28,8 +30,10 @@ class Transactions extends React.PureComponent<TransactionProps> {
         return (
             <React.Fragment>
                 <h1 id="tabelLabel">Transactions</h1>
-                {this.renderStatuses()}
-                {this.renderTypes()}
+                <Row>
+                    {this.renderStatuses()}
+                    {this.renderTypes()}
+                </Row>
                 {this.renderForecastsTable()}
                 {this.renderPagination()}
             </React.Fragment>
@@ -48,46 +52,30 @@ class Transactions extends React.PureComponent<TransactionProps> {
     private renderStatuses() {
 
         return (
-            <select name="transactionStatusFilter">
-                {this.props.transactionStatusFilters.map((status: string) =>
-                    <option value={`${status}`}>{status}</option>
-                )}
-            </select>
-            /*
-            <Dropdown>
-                <Dropdown.Toggle variant="success" id="dropdown-basic">
-                    Dropdown Button
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                <Dropdown.ItemText>Dropdown item text</Dropdown.ItemText>
-                {this.props.transactionStatusFilters.map((status: string) =>
-                    <Dropdown.Item as="button">{status}</Dropdown.Item>
-                    )}
-                </Dropdown.Menu>
-            </Dropdown>*/
+            <Col>
+                <Form.Group controlId="exampleForm.StatusSelect" >
+                    <Form.Control as="select">
+                        {this.props.transactionStatusFilters.map((status: string) =>
+                            <option value={`${status}`}>{status}</option>
+                        )}
+                    </Form.Control>
+                </Form.Group>
+            </Col>
         );
     }
 
     private renderTypes() {
 
         return (
-            <select name="transactionTypesFilter">
-                {this.props.transactionTypeFilters.map((type: string) =>
-                    <option value={`${type}`}>{type}</option>
-                )}
-            </select>
-            /*
-            <Dropdown>
-                <Dropdown.Toggle variant="success" id="dropdown-basic">
-                    Dropdown Button
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                <Dropdown.ItemText>Dropdown item text</Dropdown.ItemText>
-                {this.props.transactionStatusFilters.map((status: string) =>
-                    <Dropdown.Item as="button">{status}</Dropdown.Item>
-                    )}
-                </Dropdown.Menu>
-            </Dropdown>*/
+            <Col>
+                <Form.Group controlId="exampleForm.TypeSelect" >
+                    <Form.Control as="select">
+                        {this.props.transactionTypeFilters.map((type: string) =>
+                            <option value={`${type}`}>{type}</option>
+                        )}
+                    </Form.Control>
+                </Form.Group>
+            </Col>
         );
     }
 
