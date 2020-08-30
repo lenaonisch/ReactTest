@@ -31,7 +31,11 @@ namespace ReactTest
                 // options.UseInMemoryDatabase("TestDB")
                 );
             services.AddScoped<TransactionRepository>();
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                    .AddNewtonsoftJson(options =>
+                    {
+                        options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+                    }); ;
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

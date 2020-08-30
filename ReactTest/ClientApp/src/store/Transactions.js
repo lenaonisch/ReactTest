@@ -16,13 +16,18 @@ exports.actionCreators = {
             });
             dispatch({ type: 'REQUEST_TRANSACTIONS', startPageIndex: startPageIndex });
         }
-        //if (appState && appState.transactions && appState.transactions.transactionStatusFilters.length == 0) {
-        //    fetch(`transactions/Statuses`)
-        //        .then(response => response.json() as Promise<string[]>)
-        //        .then(data => {
-        //            dispatch({ type: 'RECEIVE_STATUSES', statuses: data });
-        //        });
-        //}
+    }; },
+    changeTypeFilter: function (type) { return function (dispatch, getState) {
+        var appState = getState();
+        if (appState && appState.transactions && (type !== appState.transactions.currentType)) {
+            dispatch({ type: 'TYPE_FILTER', transactionType: type });
+        }
+    }; },
+    changeStatusFilter: function (status) { return function (dispatch, getState) {
+        var appState = getState();
+        if (appState && appState.transactions && (status !== appState.transactions.currentType)) {
+            dispatch({ type: 'STATUS_FILTER', transactionStatus: status });
+        }
     }; },
     requestStatuses: function () { return function (dispatch, getState) {
         var appState = getState();
@@ -30,7 +35,7 @@ exports.actionCreators = {
             fetch("transactions/statuses")
                 .then(function (response) { return response.json(); })
                 .then(function (data) {
-                dispatch({ type: 'RECEIVE_STATUSES', statuses: data });
+                dispatch({ type: 'RECEIVE_STATUSES', transactionStatuses: data });
             });
         }
     }; },
@@ -47,7 +52,7 @@ exports.actionCreators = {
 };
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
-var unloadedState = { transactions: [], isLoading: false, transactionTypeFilters: [], transactionStatusFilters: [] };
+var unloadedState = { transactions: [], isLoading: false, transactionTypeFilters: [], transactionStatusFilters: [], currentStatus: "", currentType: "" };
 exports.reducer = function (state, incomingAction) {
     if (state === undefined) {
         return unloadedState;
@@ -60,6 +65,8 @@ exports.reducer = function (state, incomingAction) {
                 transactionTypeFilters: state.transactionTypeFilters,
                 transactionStatusFilters: state.transactionStatusFilters,
                 transactions: state.transactions,
+                currentStatus: state.currentStatus,
+                currentType: state.currentType,
                 isLoading: true
             };
         case 'RECEIVE_TRANSACTIONS':
@@ -71,22 +78,19 @@ exports.reducer = function (state, incomingAction) {
                     transactions: action.transactions,
                     transactionTypeFilters: state.transactionTypeFilters,
                     transactionStatusFilters: state.transactionStatusFilters,
+                    currentStatus: state.currentStatus,
+                    currentType: state.currentType,
                     isLoading: false
                 };
             }
             break;
-        //case 'FILTER_TRANSACTIONS':
-        //    return {
-        //        transactions: state.transactions.filter(t => t.transactionStatus == action.transactionStatus && t.transactionType == action.transactionType),
-        //        transactionTypeFilters: state.transactionTypeFilters,
-        //        transactionStatusFilters: state.transactionStatusFilters,
-        //        isLoading: false
-        //    };
         case 'RECEIVE_STATUSES':
             return {
                 transactions: state.transactions,
                 transactionTypeFilters: state.transactionTypeFilters,
-                transactionStatusFilters: action.statuses,
+                transactionStatusFilters: action.transactionStatuses,
+                currentStatus: state.currentStatus,
+                currentType: state.currentType,
                 isLoading: false
             };
         case 'RECEIVE_TYPES':
@@ -94,8 +98,36 @@ exports.reducer = function (state, incomingAction) {
                 transactions: state.transactions,
                 transactionTypeFilters: action.types,
                 transactionStatusFilters: state.transactionStatusFilters,
+                currentStatus: state.currentStatus,
+                currentType: state.currentType,
                 isLoading: false
             };
+        case 'TYPE_FILTER':
+            if (action.transactionType !== state.currentType) {
+                return {
+                    startPageIndex: state.startPageIndex,
+                    transactions: state.transactions,
+                    transactionTypeFilters: state.transactionTypeFilters,
+                    transactionStatusFilters: state.transactionStatusFilters,
+                    currentStatus: state.currentStatus,
+                    currentType: action.transactionType,
+                    isLoading: false
+                };
+            }
+            break;
+        case 'STATUS_FILTER':
+            if (action.transactionStatus !== state.currentStatus) {
+                return {
+                    startPageIndex: state.startPageIndex,
+                    transactions: state.transactions,
+                    transactionTypeFilters: state.transactionTypeFilters,
+                    transactionStatusFilters: state.transactionStatusFilters,
+                    currentStatus: action.transactionStatus,
+                    currentType: state.currentType,
+                    isLoading: false
+                };
+            }
+            break;
     }
     return state;
 };

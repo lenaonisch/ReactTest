@@ -42,8 +42,6 @@ class Transactions extends React.PureComponent<TransactionProps> {
 
     private ensureDataFetched() {
         const startPageIndex = parseInt(this.props.match.params.startPageIndex, 10) || 0;
-        //const transactionTypeFilter = this.props.match.params.transactionTypeFilter;
-        //const transactionStatusFilter = this.props.match.params.transactionStatusFilter;
         this.props.requestTransactions(startPageIndex);
         this.props.requestStatuses();
         this.props.requestTypes();
@@ -54,7 +52,10 @@ class Transactions extends React.PureComponent<TransactionProps> {
         return (
             <Col>
                 <Form.Group controlId="exampleForm.StatusSelect" >
-                    <Form.Control as="select">
+                    <Form.Control as="select"
+                        onChange={e => this.props.changeStatusFilter(e.target.value)}
+                    >
+                        <option></option>
                         {this.props.transactionStatusFilters.map((status: string) =>
                             <option value={`${status}`}>{status}</option>
                         )}
@@ -69,7 +70,10 @@ class Transactions extends React.PureComponent<TransactionProps> {
         return (
             <Col>
                 <Form.Group controlId="exampleForm.TypeSelect" >
-                    <Form.Control as="select">
+                    <Form.Control as="select"
+                        onChange={e => this.props.changeTypeFilter(e.target.value)}
+                    >
+                        <option></option>
                         {this.props.transactionTypeFilters.map((type: string) =>
                             <option value={`${type}`}>{type}</option>
                         )}
@@ -92,7 +96,10 @@ class Transactions extends React.PureComponent<TransactionProps> {
                     </tr>
                 </thead>
                 <tbody>
-                    {this.props.transactions.map((transaction: TransactionsStore.Transaction) =>
+                    {this.props.transactions
+                        .filter(t => (this.props.currentType !== "") ? t.transactionType == this.props.currentType : t)
+                        .filter(t => (this.props.currentStatus !== "") ? t.transactionStatus == this.props.currentStatus : t)
+                        .map((transaction: TransactionsStore.Transaction) =>
                         <tr key={transaction.transactionId}>
                             <td>{transaction.transactionId}</td>
                             <td>{transaction.transactionStatus}</td>

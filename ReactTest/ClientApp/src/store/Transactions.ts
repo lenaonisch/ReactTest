@@ -10,6 +10,8 @@ export interface TransactionsState {
     startPageIndex?: number;
     transactionTypeFilters: string[];
     transactionStatusFilters: string[];
+    currentType: string;
+    currentStatus: string;
 }
 
 export interface Transaction {
@@ -35,16 +37,19 @@ interface ReceiveTransactionsAction {
     startPageIndex: number;
 }
 
-//interface FilterTransactionsAction {
-//    type: 'FILTER_TRANSACTIONS';
-//    transactions: Transaction[];
-//    transactionStatus: string;
-//    transactionType: string;
-//}
+interface ChangeTypeFilterAction {
+    type: 'TYPE_FILTER';
+    transactionType: string;
+}
+
+interface ChangeStatusFilterAction {
+    type: 'STATUS_FILTER';
+    transactionStatus: string;
+}
 
 interface ReceiveStatusesAction {
     type: 'RECEIVE_STATUSES';
-    statuses: string[];
+    transactionStatuses: string[];
 }
 
 interface ReceiveTypesAction {
@@ -54,7 +59,7 @@ interface ReceiveTypesAction {
 
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestTransactionsAction | ReceiveTransactionsAction | /*FilterTransactionsAction |*/ ReceiveStatusesAction | ReceiveTypesAction;
+type KnownAction = RequestTransactionsAction | ReceiveTransactionsAction | ReceiveStatusesAction | ReceiveTypesAction | ChangeTypeFilterAction | ChangeStatusFilterAction ;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -75,13 +80,22 @@ export const actionCreators = {
 
             dispatch({ type: 'REQUEST_TRANSACTIONS', startPageIndex: startPageIndex});
         }
-        //if (appState && appState.transactions && appState.transactions.transactionStatusFilters.length == 0) {
-        //    fetch(`transactions/Statuses`)
-        //        .then(response => response.json() as Promise<string[]>)
-        //        .then(data => {
-        //            dispatch({ type: 'RECEIVE_STATUSES', statuses: data });
-        //        });
-        //}
+    },
+
+    changeTypeFilter: (type: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        const appState = getState();
+
+        if (appState && appState.transactions && (type !== appState.transactions.currentType)) {
+            dispatch({ type: 'TYPE_FILTER', transactionType: type});
+        }
+    },
+
+    changeStatusFilter: (status: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        const appState = getState();
+
+        if (appState && appState.transactions && (status !== appState.transactions.currentType)) {
+            dispatch({ type: 'STATUS_FILTER', transactionStatus: status });
+        }
     },
 
     requestStatuses: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
@@ -91,7 +105,7 @@ export const actionCreators = {
             fetch(`transactions/statuses`)
                 .then(response => response.json() as Promise<string[]>)
                 .then(data => {
-                    dispatch({ type: 'RECEIVE_STATUSES', statuses: data });
+                    dispatch({ type: 'RECEIVE_STATUSES', transactionStatuses: data });
                 });
         }
     },
@@ -112,7 +126,7 @@ export const actionCreators = {
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 
-const unloadedState: TransactionsState = { transactions: [], isLoading: false, transactionTypeFilters: [], transactionStatusFilters:[] };
+const unloadedState: TransactionsState = { transactions: [], isLoading: false, transactionTypeFilters: [], transactionStatusFilters: [], currentStatus: "", currentType: "" };
 
 export const reducer: Reducer<TransactionsState> = (state: TransactionsState | undefined, incomingAction: Action): TransactionsState => {
     if (state === undefined) {
@@ -127,6 +141,8 @@ export const reducer: Reducer<TransactionsState> = (state: TransactionsState | u
                 transactionTypeFilters: state.transactionTypeFilters,
                 transactionStatusFilters: state.transactionStatusFilters,
                 transactions: state.transactions,
+                currentStatus: state.currentStatus,
+                currentType: state.currentType,
                 isLoading: true
             };
         case 'RECEIVE_TRANSACTIONS':
@@ -138,22 +154,19 @@ export const reducer: Reducer<TransactionsState> = (state: TransactionsState | u
                     transactions: action.transactions,
                     transactionTypeFilters: state.transactionTypeFilters,
                     transactionStatusFilters: state.transactionStatusFilters,
+                    currentStatus: state.currentStatus,
+                    currentType: state.currentType,
                     isLoading: false
                 };
             }
             break;
-        //case 'FILTER_TRANSACTIONS':
-        //    return {
-        //        transactions: state.transactions.filter(t => t.transactionStatus == action.transactionStatus && t.transactionType == action.transactionType),
-        //        transactionTypeFilters: state.transactionTypeFilters,
-        //        transactionStatusFilters: state.transactionStatusFilters,
-        //        isLoading: false
-        //    };
         case 'RECEIVE_STATUSES':
             return {
                 transactions: state.transactions,
                 transactionTypeFilters: state.transactionTypeFilters,
-                transactionStatusFilters: action.statuses,
+                transactionStatusFilters: action.transactionStatuses,
+                currentStatus: state.currentStatus,
+                currentType: state.currentType,
                 isLoading: false
             };
         case 'RECEIVE_TYPES':
@@ -161,8 +174,36 @@ export const reducer: Reducer<TransactionsState> = (state: TransactionsState | u
                 transactions: state.transactions,
                 transactionTypeFilters: action.types,
                 transactionStatusFilters: state.transactionStatusFilters,
+                currentStatus: state.currentStatus,
+                currentType: state.currentType,
                 isLoading: false
             };
+        case 'TYPE_FILTER':
+            if (action.transactionType !== state.currentType) {
+                return {
+                    startPageIndex: state.startPageIndex,
+                    transactions: state.transactions,
+                    transactionTypeFilters: state.transactionTypeFilters,
+                    transactionStatusFilters: state.transactionStatusFilters,
+                    currentStatus: state.currentStatus,
+                    currentType: action.transactionType,
+                    isLoading: false
+                };
+            }
+            break;
+        case 'STATUS_FILTER':
+            if (action.transactionStatus !== state.currentStatus) {
+                return {
+                    startPageIndex: state.startPageIndex,
+                    transactions: state.transactions,
+                    transactionTypeFilters: state.transactionTypeFilters,
+                    transactionStatusFilters: state.transactionStatusFilters,
+                    currentStatus: action.transactionStatus,
+                    currentType: state.currentType,
+                    isLoading: false
+                };
+            }
+            break;
     }
 
     return state;
