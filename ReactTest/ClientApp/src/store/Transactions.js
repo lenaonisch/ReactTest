@@ -29,6 +29,12 @@ exports.actionCreators = {
             dispatch({ type: 'STATUS_FILTER', transactionStatus: status });
         }
     }; },
+    exportCSV: function () { return function (dispatch, getState) {
+        var appState = getState();
+        if (appState && appState.transactions && (status !== appState.transactions.currentType)) {
+            dispatch({ type: 'STATUS_FILTER', transactionStatus: status });
+        }
+    }; },
     requestStatuses: function () { return function (dispatch, getState) {
         var appState = getState();
         if (appState && appState.transactions && appState.transactions.transactionStatusFilters.length == 0) {

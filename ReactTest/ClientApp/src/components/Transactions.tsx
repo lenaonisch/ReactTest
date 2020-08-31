@@ -33,6 +33,7 @@ class Transactions extends React.PureComponent<TransactionProps> {
                 <Row>
                     {this.renderStatuses()}
                     {this.renderTypes()}
+                    {/*this.renderFileControls()*/}
                 </Row>
                 {this.renderForecastsTable()}
                 {this.renderPagination()}
@@ -47,6 +48,22 @@ class Transactions extends React.PureComponent<TransactionProps> {
         this.props.requestTypes();
     }
 
+    private renderFileControls() {
+        return (
+            <Form>
+                <Form.Group>
+                    <Form.File id="saveToFileInput" label="Save..."
+                        onClick={() =>
+                            this.props.exportCSV()
+                        }
+                    />
+                </Form.Group >
+                <Form.Group>
+                    <Form.File id="downloadFromFileInput" label="Open..." />
+                </Form.Group >
+            </Form>
+        )
+    }
     private renderStatuses() {
 
         return (
@@ -56,8 +73,8 @@ class Transactions extends React.PureComponent<TransactionProps> {
                         onChange={e => this.props.changeStatusFilter(e.target.value)}
                     >
                         <option></option>
-                        {this.props.transactionStatusFilters.map((status: string) =>
-                            <option value={`${status}`}>{status}</option>
+                        {this.props.transactionStatusFilters.map((transactionStatus: string) =>
+                            <option value={`${transactionStatus}`}>{transactionStatus}</option>
                         )}
                     </Form.Control>
                 </Form.Group>

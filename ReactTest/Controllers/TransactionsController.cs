@@ -1,9 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using CsvHelper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ReactTest.Data;
 using ReactTest.Data.Entities;
 using ReactTest.Repositories;
 
@@ -41,6 +47,27 @@ namespace ReactTest.Controllers
         {
             var values = Enum.GetNames(typeof(TransactionType));
             return Ok(values);
+        }
+
+        [HttpGet()]
+        [Route("export")]
+        public async Task<IActionResult> FileAsync(/*TransactionFilter filter*/)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(memoryStream))
+                {
+                    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+                    {
+                        //var transactions = (await _transactionsRepository.GetWhere(t => t.SutisfyFilter(filter)));
+                        var transactions = await _transactionsRepository.GetAllAsync();
+
+                        csv.WriteRecords(transactions);
+
+                        return File(memoryStream.GetBuffer(), "text/csv");
+                    }
+                }
+            }
         }
     }
 }

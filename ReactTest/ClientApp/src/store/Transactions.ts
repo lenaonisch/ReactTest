@@ -90,12 +90,25 @@ export const actionCreators = {
         }
     },
 
-    changeStatusFilter: (status: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
+    changeStatusFilter: (newStatus: string): AppThunkAction<KnownAction> => (dispatch, getState) => {
         const appState = getState();
 
-        if (appState && appState.transactions && (status !== appState.transactions.currentType)) {
-            dispatch({ type: 'STATUS_FILTER', transactionStatus: status });
+        if (appState && appState.transactions && (newStatus !== appState.transactions.currentType)) {
+            dispatch({ type: 'STATUS_FILTER', transactionStatus: newStatus });
         }
+    },
+
+    exportCSV: (): AppThunkAction<KnownAction> => (dispatch, getState) => {
+        const appState = getState();
+        var data = {
+            "TransactionStatus": 1,
+            "TransactionType": 1
+        }
+        fetch(`transactions/export`)
+            .then((response) => {
+                var fileDownload = require("js-file-download");
+                fileDownload(response, "filename.csv");
+            });
     },
 
     requestStatuses: (): AppThunkAction<KnownAction> => (dispatch, getState) => {

@@ -11,7 +11,7 @@ namespace ReactTest.Repositories
     public class EFRepositoryAsync<T> where T : class
     {
         private readonly DataContext _context;
-        protected readonly DbSet<T> _dbSet;
+        public readonly DbSet<T> _dbSet;
 
         public EFRepositoryAsync(DataContext context)
         {
