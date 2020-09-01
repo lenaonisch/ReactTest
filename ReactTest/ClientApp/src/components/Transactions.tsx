@@ -7,6 +7,7 @@ import * as TransactionsStore from '../store/Transactions';
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/esm/Col';
 import Row from 'react-bootstrap/esm/Row';
+import { Button } from 'reactstrap';
 
 // At runtime, Redux will merge together...
 type TransactionProps =
@@ -33,12 +34,22 @@ class Transactions extends React.PureComponent<TransactionProps> {
                 <Row>
                     {this.renderStatuses()}
                     {this.renderTypes()}
-                    {/*this.renderFileControls()*/}
+                    {this.renderFileControls()}
+                    {this.renderLink()}
                 </Row>
                 {this.renderForecastsTable()}
                 {this.renderPagination()}
             </React.Fragment>
         );
+    }
+
+    private renderLink() {
+        if (this.props.fileURL !== undefined) {
+            return (
+                <Link to={this.props.fileURL} target="_blank" download>Download</Link>
+            )
+
+        }
     }
 
     private ensureDataFetched() {
@@ -52,11 +63,17 @@ class Transactions extends React.PureComponent<TransactionProps> {
         return (
             <Form>
                 <Form.Group>
-                    <Form.File id="saveToFileInput" label="Save..."
-                        onClick={() =>
-                            this.props.exportCSV()
+                    
+                    <Button
+                        onClick={() => {
+                            this.props.exportCSV();
+                            
                         }
-                    />
+                           // this.props.exportCSV(e.target.files[0].name)
+                            //console.log(e.target.files)
+                        }
+                    >Export to CSV</Button>
+                    
                 </Form.Group >
                 <Form.Group>
                     <Form.File id="downloadFromFileInput" label="Open..." />

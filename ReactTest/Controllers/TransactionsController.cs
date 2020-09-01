@@ -51,11 +51,13 @@ namespace ReactTest.Controllers
 
         [HttpGet()]
         [Route("export")]
-        public async Task<IActionResult> FileAsync(/*TransactionFilter filter*/)
+        public async Task<string> FileAsync(/*TransactionFilter filter*/)
         {
-            using (var memoryStream = new MemoryStream())
-            {
-                using (var writer = new StreamWriter(memoryStream))
+            //using (var memoryStream = new MemoryStream())
+            //{
+            var dir = Directory.GetCurrentDirectory();
+            string filePath = dir + "\\ClientApp\\public\\resources\\" + DateTime.Now.ToString("MMddyyyyHHmm") + ".csv";
+                using (var writer = new StreamWriter(filePath))
                 {
                     using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
                     {
@@ -64,10 +66,10 @@ namespace ReactTest.Controllers
 
                         csv.WriteRecords(transactions);
 
-                        return File(memoryStream.GetBuffer(), "text/csv");
+                        return filePath;//File(fileName, "text/csv");
                     }
                 }
-            }
+            //}
         }
     }
 }

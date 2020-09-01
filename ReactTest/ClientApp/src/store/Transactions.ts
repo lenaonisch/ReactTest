@@ -12,6 +12,7 @@ export interface TransactionsState {
     transactionStatusFilters: string[];
     currentType: string;
     currentStatus: string;
+    fileURL?: string;
 }
 
 export interface Transaction {
@@ -57,9 +58,14 @@ interface ReceiveTypesAction {
     types: string[];
 }
 
+interface ReceiveFileURL {
+    type: 'RECEIVE_FILE_URL';
+    fileURL: string;
+}
+
 // Declare a 'discriminated union' type. This guarantees that all references to 'type' properties contain one of the
 // declared type strings (and not any other arbitrary string).
-type KnownAction = RequestTransactionsAction | ReceiveTransactionsAction | ReceiveStatusesAction | ReceiveTypesAction | ChangeTypeFilterAction | ChangeStatusFilterAction ;
+type KnownAction = RequestTransactionsAction | ReceiveTransactionsAction | ReceiveStatusesAction | ReceiveTypesAction | ChangeTypeFilterAction | ChangeStatusFilterAction | ReceiveFileURL;
 
 // ----------------
 // ACTION CREATORS - These are functions exposed to UI components that will trigger a state transition.
@@ -105,9 +111,9 @@ export const actionCreators = {
             "TransactionType": 1
         }
         fetch(`transactions/export`)
-            .then((response) => {
-                var fileDownload = require("js-file-download");
-                fileDownload(response, "filename.csv");
+            .then(response => response.json() as Promise<string>)
+            .then(data => {
+                dispatch({ type: 'RECEIVE_FILE_URL', fileURL: data });
             });
     },
 
@@ -139,7 +145,7 @@ export const actionCreators = {
 // ----------------
 // REDUCER - For a given state and action, returns the new state. To support time travel, this must not mutate the old state.
 
-const unloadedState: TransactionsState = { transactions: [], isLoading: false, transactionTypeFilters: [], transactionStatusFilters: [], currentStatus: "", currentType: "" };
+const unloadedState: TransactionsState = { transactions: [], isLoading: false, transactionTypeFilters: [], transactionStatusFilters: [], currentStatus: "", currentType: "", fileURL: "public/resources/090120201709.csv" };
 
 export const reducer: Reducer<TransactionsState> = (state: TransactionsState | undefined, incomingAction: Action): TransactionsState => {
     if (state === undefined) {
@@ -213,6 +219,20 @@ export const reducer: Reducer<TransactionsState> = (state: TransactionsState | u
                     transactionStatusFilters: state.transactionStatusFilters,
                     currentStatus: action.transactionStatus,
                     currentType: state.currentType,
+                    isLoading: false
+                };
+            }
+            break;
+        case 'RECEIVE_FILE_URL':
+            if (action.fileURL != '') {
+                return {
+                    startPageIndex: state.startPageIndex,
+                    transactions: state.transactions,
+                    transactionTypeFilters: state.transactionTypeFilters,
+                    transactionStatusFilters: state.transactionStatusFilters,
+                    currentStatus: state.currentStatus,
+                    currentType: state.currentType,
+                    fileURL: action.fileURL,
                     isLoading: false
                 };
             }
