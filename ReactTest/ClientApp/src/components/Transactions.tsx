@@ -7,6 +7,7 @@ import * as TransactionsStore from '../store/Transactions';
 import Form from 'react-bootstrap/Form';
 import Col from 'react-bootstrap/esm/Col';
 import Row from 'react-bootstrap/esm/Row';
+import { Button } from 'reactstrap';
 
 // At runtime, Redux will merge together...
 type TransactionProps =
@@ -33,7 +34,7 @@ class Transactions extends React.PureComponent<TransactionProps> {
                 <Row>
                     {this.renderStatuses()}
                     {this.renderTypes()}
-                    {/*this.renderFileControls()*/}
+                    {this.renderFileControls()}
                 </Row>
                 {this.renderForecastsTable()}
                 {this.renderPagination()}
@@ -51,13 +52,22 @@ class Transactions extends React.PureComponent<TransactionProps> {
     private renderFileControls() {
         return (
             <Form>
-                <Form.Group>
+                {/*<Form.Group>
                     <Form.File id="saveToFileInput" label="Save..."
                         onClick={() =>
                             this.props.exportCSV()
                         }
                     />
-                </Form.Group >
+                </Form.Group >*/}
+                <Button
+                        onClick={() => {
+                        this.props.exportCSV();
+
+                    }
+                        // this.props.exportCSV(e.target.files[0].name)
+                        //console.log(e.target.files)
+                    }
+                    >Export to CSV</Button>
                 <Form.Group>
                     <Form.File id="downloadFromFileInput" label="Open..." />
                 </Form.Group >

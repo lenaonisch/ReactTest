@@ -4,11 +4,15 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using CsvHelper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
+using System.Net.Http.Headers;
 using ReactTest.Data;
 using ReactTest.Data.Entities;
 using ReactTest.Repositories;
@@ -55,6 +59,9 @@ namespace ReactTest.Controllers
         {
             using (var memoryStream = new MemoryStream())
             {
+                //var dir = Directory.GetCurrentDirectory();
+                string fileName = DateTime.Now.ToString("MMddyyyyHHmm") + ".csv";
+                //string filePath = dir + "\\ClientApp\\public\\resources\\" + fileName;
                 using (var writer = new StreamWriter(memoryStream))
                 {
                     using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
@@ -63,8 +70,16 @@ namespace ReactTest.Controllers
                         var transactions = await _transactionsRepository.GetAllAsync();
 
                         csv.WriteRecords(transactions);
+                        csv.Flush();
 
-                        return File(memoryStream.GetBuffer(), "text/csv");
+                        //return new FileStreamResult(memoryStream, "text/csv");
+                        return File(memoryStream, "text/csv", fileName);
+                        //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+                        //result.Content = new StreamContent(memoryStream);
+                        //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+                        //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "Export.csv" };
+                        
+                        //return result;
                     }
                 }
             }
