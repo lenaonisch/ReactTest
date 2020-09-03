@@ -61,7 +61,19 @@ class Transactions extends React.PureComponent<TransactionProps> {
                 </Form.Group >*/}
                 <Button
                         onClick={() => {
-                        this.props.exportCSV();
+                        //this.props.exportCSV();
+                        fetch(`transactions/export`)
+                            .then((response) => {
+                                const contentType = response.headers.get('content-type');
+                                console.log(contentType);
+                               
+                                return response.blob();
+                            })
+                            .then(data => {
+                                //data.src = URL.createObjectURL(myBlob);
+                                var fileDownload = require("js-file-download");
+                                fileDownload(data, "filename.csv");
+                            });
 
                     }
                         // this.props.exportCSV(e.target.files[0].name)

@@ -55,34 +55,52 @@ namespace ReactTest.Controllers
 
         [HttpGet()]
         [Route("export")]
-        public async Task<IActionResult> FileAsync(/*TransactionFilter filter*/)
+        public async Task<FileStreamResult> FileAsync(/*TransactionFilter filter*/)
         {
+            var dir = Directory.GetCurrentDirectory();
+            string fileName = DateTime.Now.ToString("MMddyyyyHHmm") + ".csv";
+            string filePath = dir + "\\ClientApp\\public\\resources\\" + fileName;
+
+            //using ()
+            //{
+
             using (var memoryStream = new MemoryStream())
-            {
-                //var dir = Directory.GetCurrentDirectory();
-                string fileName = DateTime.Now.ToString("MMddyyyyHHmm") + ".csv";
-                //string filePath = dir + "\\ClientApp\\public\\resources\\" + fileName;
-                using (var writer = new StreamWriter(memoryStream))
-                {
-                    using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-                    {
-                        //var transactions = (await _transactionsRepository.GetWhere(t => t.SutisfyFilter(filter)));
-                        var transactions = await _transactionsRepository.GetAllAsync();
+            { 
+                //using (var writer = new StreamWriter(memoryStream))
+                //{
+                var writer = new StreamWriter(memoryStream);
+                var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            
+                //var transactions = (await _transactionsRepository.GetWhere(t => t.SutisfyFilter(filter)));
+                var transactions = await _transactionsRepository.GetAllAsync();
 
-                        csv.WriteRecords(transactions);
-                        csv.Flush();
+                csv.WriteRecords(transactions);
+                csv.Flush();
+                memoryStream.Position = 0;
+                return new FileStreamResult(memoryStream, "text/csv");
 
-                        //return new FileStreamResult(memoryStream, "text/csv");
-                        return File(memoryStream, "text/csv", fileName);
-                        //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
-                        //result.Content = new StreamContent(memoryStream);
-                        //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
-                        //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "Export.csv" };
-                        
-                        //return result;
-                    }
-                }
+                //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+                //result.Content = new StreamContent(memoryStream);
+                //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+                //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "Export.csv" };
+
+                //return result;
+
+                // return File(memoryStream, "text/csv", fileName);
+                // }
+                //writer.Flush();
             }
+            
+            //var mimeType = "text/csv";
+            //FileStreamResult fileStreamResult = null;
+            //using (var stream = System.IO.File.Open(filePath, FileMode.Open))
+            //{
+            //    fileStreamResult = new FileStreamResult(stream, mimeType)
+            //    {
+            //        FileDownloadName = fileName
+            //    };
+            //}
+            //return fileStreamResult;
         }
     }
 }
