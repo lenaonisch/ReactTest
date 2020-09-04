@@ -55,42 +55,42 @@ namespace ReactTest.Controllers
 
         [HttpGet()]
         [Route("export")]
-        public async Task<FileStreamResult> FileAsync(/*TransactionFilter filter*/)
+        public async Task<string> FileAsync(/*TransactionFilter filter*/)
         {
-            var dir = Directory.GetCurrentDirectory();
+            string dir = Directory.GetCurrentDirectory();
             string fileName = DateTime.Now.ToString("MMddyyyyHHmm") + ".csv";
-            string filePath = dir + "\\ClientApp\\public\\resources\\" + fileName;
+            string filePath = "\\ClientApp\\public\\resources\\";
 
             //using ()
             //{
 
-            using (var memoryStream = new MemoryStream())
-            { 
+            
                 //using (var writer = new StreamWriter(memoryStream))
                 //{
-                var writer = new StreamWriter(memoryStream);
-                var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
-            
+            var writer = new StreamWriter(dir + filePath + fileName);
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+
                 //var transactions = (await _transactionsRepository.GetWhere(t => t.SutisfyFilter(filter)));
                 var transactions = await _transactionsRepository.GetAllAsync();
 
                 csv.WriteRecords(transactions);
-                csv.Flush();
-                memoryStream.Position = 0;
-                return new FileStreamResult(memoryStream, "text/csv");
-
-                //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
-                //result.Content = new StreamContent(memoryStream);
-                //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
-                //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "Export.csv" };
-
-                //return result;
-
-                // return File(memoryStream, "text/csv", fileName);
-                // }
-                //writer.Flush();
+                //csv.Flush();
+                //memoryStream.Position = 0;
+                
             }
-            
+            //HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            //result.Content = new StreamContent(memoryStream);
+            //result.Content.Headers.ContentType = new MediaTypeHeaderValue("text/csv");
+            //result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") { FileName = "Export.csv" };
+
+            //return result;
+
+            // return File(memoryStream, "text/csv", fileName);
+            // }
+            //writer.Flush();
+            return "/resources/" + fileName;
+
             //var mimeType = "text/csv";
             //FileStreamResult fileStreamResult = null;
             //using (var stream = System.IO.File.Open(filePath, FileMode.Open))

@@ -64,15 +64,21 @@ class Transactions extends React.PureComponent<TransactionProps> {
                         //this.props.exportCSV();
                         fetch(`transactions/export`)
                             .then((response) => {
-                                const contentType = response.headers.get('content-type');
-                                console.log(contentType);
-                               
-                                return response.blob();
+                                //const contentType = response.headers.get('content-type');
+                                //console.log(contentType);
+
+                                return response.json();
                             })
                             .then(data => {
                                 //data.src = URL.createObjectURL(myBlob);
-                                var fileDownload = require("js-file-download");
-                                fileDownload(data, "filename.csv");
+                                //var fileDownload = require("js-file-download");
+                                //fileDownload(data, "filename.csv");
+                                var downloading = browser.downloads.download({
+                                    url: data,
+                                    saveAs: true
+                                });
+
+                                downloading.then(onStartedDownload, onFailed);
                             });
 
                     }
